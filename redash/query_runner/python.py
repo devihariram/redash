@@ -1,6 +1,7 @@
 import datetime
 import importlib
 import logging
+import traceback
 import sys
 
 from RestrictedPython import compile_restricted
@@ -360,7 +361,13 @@ class Python(BaseQueryRunner):
             self.validate_result(data)
             data["log"] = self._custom_print.lines
         except Exception as e:
-            error = str(type(e)) + " " + str(e)
+            tb = traceback.extract_tb(e.__traceback__)
+            user_code_tb = [entry for entry in tb if entry.filename == "<string>"]
+            if user_code_tb:
+                line_number = user_code_tb[-1].lineno
+                error = f"{type(e).__name__} at line {line_number}: {str(e)}"
+            else:
+                error = f"{type(e).__name__}: {str(e)}"
             data = None
 
         return data, error
