@@ -127,8 +127,11 @@ export default class ItemsTable extends React.Component {
   };
 
   prepareColumns() {
-    const { orderByField, orderByReverse, toggleSorting } = this.props;
-    const orderByDirection = orderByReverse ? "descend" : "ascend";
+    const { orderByField, toggleSorting } = this.props;
+    let orderByDirection = null;
+    if (orderByField) {
+      orderByDirection = this.state.sortOrder === "ascend" ? "ascend" : "descend";
+    }
 
     return map(
       map(
@@ -137,7 +140,15 @@ export default class ItemsTable extends React.Component {
       ),
       (column, index) => {
         // Bind click events only to sortable columns
-        const onHeaderCell = column.sorter ? () => ({ onClick: () => toggleSorting(column.orderByField) }) : null;
+        const onHeaderCell = column.sorter
+          ? () => ({
+              onClick: () => {
+                const newSortOrder = this.state.sortOrder === "ascend" ? "descend" : "ascend";
+                this.setState({ sortOrder: newSortOrder });
+                toggleSorting(column.orderByField, newSortOrder);
+              },
+            })
+          : null;
 
         // Wrap render function to pass correct arguments
         const render = isFunction(column.render) ? (text, row) => column.render(text, row.item) : identity;
@@ -145,7 +156,7 @@ export default class ItemsTable extends React.Component {
         return extend(omit(column, ["field", "orderByField", "render"]), {
           key: "column" + index,
           dataIndex: ["item", column.field],
-          defaultSortOrder: column.orderByField === orderByField ? orderByDirection : null,
+          sortOrder: column.orderByField === orderByField ? orderByDirection : null,
           onHeaderCell,
           render,
         });
