@@ -126,11 +126,16 @@ export default class ItemsTable extends React.Component {
     toggleSorting: () => {},
   };
 
+  state = {
+    sortOrder: null,
+  };
+
   prepareColumns() {
     const { orderByField, toggleSorting } = this.props;
+    const { sortOrder } = this.state;
     let orderByDirection = null;
     if (orderByField) {
-      orderByDirection = this.state.sortOrder === "ascend" ? "ascend" : "descend";
+      orderByDirection = sortOrder;
     }
 
     return map(
@@ -143,7 +148,14 @@ export default class ItemsTable extends React.Component {
         const onHeaderCell = column.sorter
           ? () => ({
               onClick: () => {
-                const newSortOrder = this.state.sortOrder === "ascend" ? "descend" : "ascend";
+                let newSortOrder;
+                if (sortOrder === "ascend") {
+                  newSortOrder = "descend";
+                } else if (sortOrder === "descend") {
+                  newSortOrder = null;
+                } else {
+                  newSortOrder = "ascend";
+                }
                 this.setState({ sortOrder: newSortOrder });
                 toggleSorting(column.orderByField, newSortOrder);
               },

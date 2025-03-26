@@ -124,8 +124,13 @@ export class ItemsSource {
     });
   };
 
-  toggleSorting = orderByField => {
-    this._sorter.toggleField(orderByField);
+  toggleSorting = (orderByField, sortOrder) => {
+    if (sortOrder === null) {
+      this._sorter.setField(null);
+    } else {
+      this._sorter.setField(orderByField);
+      this._sorter.setReverse(sortOrder === "descend");
+    }
     this._savedOrderByField = this._sorter.field;
     this._changed({ sorting: true });
   };
